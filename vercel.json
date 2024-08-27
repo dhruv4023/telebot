@@ -1,11 +1,5 @@
 {
   "version": 2,
-  "REWRITES": [
-    {
-      "SOURCE": "/(.*)",
-      "DESTINATION": "/"
-    }
-  ],
   "builds": [
     {
       "src": "dist/main.js",
@@ -18,5 +12,6 @@
       "dest": "dist/main.js",
       "methods": ["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"]
     }
-  ]
+  ],
+  "rewrites": [{ "source": "/about", "destination": "/about-our-company.html" }]
 }
