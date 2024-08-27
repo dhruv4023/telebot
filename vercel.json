@@ -1,3 +1,15 @@
 {
-  "rewrites": [{ "source": "/about", "destination": "/about-our-company.html" }]
+  "version": 2,
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/dist/main.js"
+    }
+  ]
 }
