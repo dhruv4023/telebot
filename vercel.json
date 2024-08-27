@@ -1,5 +1,11 @@
 {
   "version": 2,
+  "REWRITES": [
+    {
+      "SOURCE": "/(.*)",
+      "DESTINATION": "/"
+    }
+  ],
   "builds": [
     {
       "src": "dist/main.js",
