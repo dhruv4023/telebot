@@ -9,11 +9,13 @@ import { HttpModule } from '@nestjs/axios';
 import { MongoDBModule } from './mongodb/mongodb.module';
 import { PassportModule } from '@nestjs/passport';
 import { WeatherService } from './weather/weather.service';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
     AuthModule,
     AdminModule,
+    ScheduleModule.forRoot(),
     PassportModule.register({ defaultStrategy: 'google' }),
     MongoDBModule,
     HttpModule,
