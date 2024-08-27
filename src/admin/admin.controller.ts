@@ -1,7 +1,9 @@
 import { Controller, Get, Post, Body, Param } from '@nestjs/common';
+import { AuthService } from 'src/auth/auth.service';
 
 @Controller('admin')
 export class AdminController {
+  constructor(private readonly authService: AuthService) {}
   @Get('settings')
   getSettings() {
     // Return current settings
@@ -14,7 +16,7 @@ export class AdminController {
 
   @Get('users')
   getUsers() {
-    // Return a list of users
+    return this.authService.getAllSubscribedUsers();
   }
 
   @Post('users/:id/block')

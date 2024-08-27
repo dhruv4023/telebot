@@ -13,12 +13,12 @@ export class AppController {
   getHello(): string {
     return this.appService.getHello();
   }
-  @Get()
+  @Get('/about')
   getAbout(): string {
     return this.appService.getAbout();
   }
 
-  @Get("/dailytask")
+  @Get('/dailytask')
   automaticTasks(): void {
     this.telegramService.sendDailyWeatherUpdate();
   }
