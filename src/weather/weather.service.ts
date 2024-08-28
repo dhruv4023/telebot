@@ -9,7 +9,7 @@ export class WeatherService {
   private readonly apiKey: string = process.env.WEATHER_API_KEY;
   private readonly apiUrl: string = process.env.WEATHER_API_URL;
   private readonly cache: NodeCache;
- 
+
   constructor(private readonly httpService: HttpService) {
     this.cache = new NodeCache({ stdTTL: 3600 }); // Cache items for 1 hour (3600 seconds)
   }
@@ -26,8 +26,10 @@ export class WeatherService {
     // Fetch the data if not in cache
     try {
       const url = `${this.apiUrl}?key=${this.apiKey}&q=${city}`;
-      
-      const response: AxiosResponse<any> = await firstValueFrom(this.httpService.get(url));
+
+      const response: AxiosResponse<any> = await firstValueFrom(
+        this.httpService.get(url),
+      );
       const weatherData = response.data;
 
       const weatherMessage = `

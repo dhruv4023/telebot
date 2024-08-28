@@ -4,7 +4,6 @@ import { Schema, Document } from 'mongoose';
 export interface User extends Document {
   readonly chatId: number;
   readonly username: string;
-  readonly admin: boolean;
   readonly city: string;
   readonly isBlocked?: boolean;
 }
@@ -13,7 +12,6 @@ export interface User extends Document {
 export const UserSchema = new Schema({
   chatId: { type: Number, required: true, unique: true },
   username: { type: String, required: true, unique: true },
-  admin: { type: Boolean, default: false },
   city: { type: String, default: 'Ahmedabad' },
   isBlocked: { type: Boolean, default: false },
 });

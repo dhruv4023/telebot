@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            text-align: center;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .message {
+            margin: 10px 0;
+            color: red;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Login</h1>
+        <button id="loginButton">Login with Google</button>
+        <div class="message" id="loginMessage"></div>
+    </div>
+
+    <script>
+        const apiBaseUrl = 'http://localhost:3000';
+
+        document.getElementById('loginButton').addEventListener('click', () => {
+            window.location.href = `${apiBaseUrl}/auth/google`;
+        });
+    </script>
+</body>
+
+</html>

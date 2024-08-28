@@ -1,15 +1,17 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, VerifyCallback } from 'passport-google-oauth20';
+import { sign } from 'jsonwebtoken';
+import { AdminService } from 'src/auth/admin/admin.service';
+
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
-  constructor() {
+  constructor(private readonly adminService: AdminService) {
     super({
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       callbackURL: process.env.GOOGLE_CALLBACK_URL,
       scope: ['email', 'profile'],
-      state: true,
       passReqToCallback: true, // Enables passing the request to the validate function
     });
   }
@@ -27,25 +29,27 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     done: VerifyCallback,
   ): Promise<any> {
     const { name, emails } = profile;
-    console.log('Received state:', req.query.state);
-    // Defensive check for state parameter
-    const state = req.query.state ? decodeURIComponent(req.query.state) : '';
-    const [tgPart, usernamePart] = state.split('|');
 
-    // Default values in case state is not in the expected format
-    const chatId = tgPart.replace('tg_', '');
-    const username = usernamePart.replace('username_', '');
+    try {
+      const admin = await this.adminService.getAdminByEmail(emails[0].value);
+      if (!admin) {
+        throw new NotFoundException(
+          'Admin not found. Please contact the main admin.',
+        );
+      }
+      const user = {
+        email: emails[0].value,
+        name: name.givenName + ' ' + name.familyName,
+        accessToken,
+        token: sign(
+          { email: emails[0].value, mainAdmin: admin.mainAdmin },
+          process.env.JWT_SECRET,
+        ),
+      };
 
-    console.log(chatId, username);
-    const user = {
-      email: emails[0].value,
-      firstName: name.givenName,
-      lastName: name.familyName,
-      accessToken,
-      chatId, // Adding chatId to user details
-      username, // Adding username to user details
-    };
-
-    done(null, user);
+      done(null, user);
+    } catch (error) {
+      done(error, false);
+    }
   }
 }

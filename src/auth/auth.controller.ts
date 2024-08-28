@@ -1,6 +1,7 @@
-import { Controller, Get, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Redirect, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { AuthService } from './auth.service';
+import { Request, Response } from 'express';
+import * as session from 'express-session';
 
 @Controller('auth')
 export class AuthController {
@@ -14,17 +15,14 @@ export class AuthController {
 
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
-  async googleAuthRedirect(@Req() req) {
-    // const state = decodeURIComponent(req.query.state || "");
-
-    // if (!state) {
-    //   throw new Error('Missing state parameter');
-    // }
-
-    return {
-      message: 'User information from Google',
-      user: req.user,
-    };
+  async googleAuthRedirect(@Req() req,@Res() res: Response) {
+    if (req.session) {
+      req.session.user = req.user;
+      res.redirect('/admin-panel');
+    } else {
+      // Handle the case where session is not initialized
+      res.status(500).send('Session is not initialized');
+    }
   }
 
   @Get('logout')

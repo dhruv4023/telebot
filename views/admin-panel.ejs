@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+
+    table,
+    th,
+    td {
+      border: 1px solid #ddd;
+    }
+
+    th,
+    td {
+      padding: 8px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f4f4f4;
+    }
+
+    form {
+      margin-bottom: 20px;
+    }
+
+    .input_text {
+
+      padding: 8px;
+      margin: 5px;
+    }
+
+    input[type="number"],
+    input[type="submit"] {
+      padding: 8px;
+      margin: 5px;
+    }
+
+    .message {
+      margin: 10px 0;
+      color: green;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>Admin Panel</h1>
+    <hr />
+    <h2>Manage Admins</h2>
+    <form id="addAdminForm">
+      <h3>Add Admin</h3>
+      <input class="input_text" type="text" id="adminName" placeholder="Name" required>
+      <input class="input_text" type="email" id="adminEmail" placeholder="Email" required>
+      <input type="submit" value="Add Admin">
+    </form>
+    <h2>Admin List</h2>
+    <table id="adminsTable">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Main Admin</th>
+          <th>Remove</th>
+        </tr>
+      </thead>
+      <tbody id="adminsTableBody">
+        <% admins.forEach(admin=> { %>
+          <tr>
+            <td>
+              <%= admin.name %>
+            </td>
+            <td>
+              <%= admin.email %>
+            </td>
+            <td>
+              <%= admin.mainAdmin ? 'Yes' : 'No' %>
+            </td>
+            <td>
+              <% if (!admin.mainAdmin) { %>
+                <button onclick="removeAdmin('<%= admin._id %>')">Remove</button>
+                <% } else { %>
+                  <button disabled>Remove</button>
+                  <% } %>
+            </td>
+          </tr>
+          <% }); %>
+      </tbody>
+    </table>
+
+    <hr />
+    <h2>API Secret</h2>
+    <form id="addApiSecret">
+      <input class="input_text" id="key" placeholder="Enter key here" required />
+      <input class="input_text" id="secret" placeholder="Enter secret here" required />
+      <input type="submit" value="Add secret">
+    </form>
+    <table>
+      <thead>
+        <tr>
+          <th>Key</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% apiSecrets.forEach(as=> { %>
+          <tr id="row-<%= as.key %>">
+            <td>
+              <span id="key-display-<%= as.key %>">
+                <%= as.key %>
+              </span>
+              <input type="text" id="key-edit-<%= as.key %>" value="<%= as.key %>" style="display: none;">
+              <input type="text" id="secret-edit-<%= as.key %>" style="display: none;">
+            </td>
+            <td>
+              <button onclick="toggleEdit('<%= as.key %>')">Edit</button>
+              <button onclick="updateSecret('<%= as.key %>')" style="display: none;"
+                id="update-<%= as.key %>">Update</button>
+              <button onclick="deleteSecret('<%= as.key %>')">Delete</button>
+            </td>
+          </tr>
+          <% }); %>
+      </tbody>
+    </table>
+    <hr />
+    <h2>User List</h2>
+    <table id="usersTable">
+      <thead>
+        <tr>
+          <th>chat Id</th>
+          <th>username</th>
+          <th>Action</th>
+          <th>Remove</th>
+        </tr>
+      </thead>
+      <tbody id="adminsTableBody">
+        <% users.forEach(user=> { %>
+          <tr>
+            <td>
+              <%= user.chatId %>
+            </td>
+            <td>
+              <%= user.username %>
+            </td>
+            <td>
+              <% if (user.isBlocked) { %>
+                <button onclick="unblockUser('<%= user.chatId %>')">Unblock</button>
+                <% } else { %>
+                  <button onclick="blockUser('<%= user.chatId %>')">Block</button>
+                  <% } %>
+            </td>
+            <td>
+              <button onclick="deleteUser('<%= user.username %>')">Remove</button>
+            </td>
+          </tr>
+          <% }); %>
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    const apiBaseUrl = '<%= apiBaseUrl %>'; // Replace with your actual API base UR
+
+    function toggleEdit(key) {
+      const keyDisplay = document.getElementById(`key-display-${key}`);
+      const keyEdit = document.getElementById(`key-edit-${key}`);
+      const secretEdit = document.getElementById(`secret-edit-${key}`);
+      const updateButton = document.getElementById(`update-${key}`);
+
+      if (keyDisplay.style.display === 'none') {
+        // Switch to view mode
+        keyDisplay.style.display = 'inline';
+        keyEdit.style.display = 'none';
+        secretEdit.style.display = 'none';
+        updateButton.style.display = 'none';
+      } else {
+        // Switch to edit mode
+        keyDisplay.style.display = 'none';
+        keyEdit.style.display = 'inline';
+        secretEdit.style.display = 'inline';
+        updateButton.style.display = 'inline';
+      }
+    }
+
+    async function updateSecret(key) {
+      const newKey = document.getElementById(`key-edit-${key}`).value;
+      const newSecret = document.getElementById(`secret-edit-${key}`).value;
+      if (confirm(`Are you sure you want to update the secret with key '${key}'?`)) {
+        try {
+          const response = await fetch(`/api-secrets/${key}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': '<%= auth.token %>' // Include token for authorization
+            },
+            body: JSON.stringify({ key: newKey, secret: newSecret })
+          });
+          const result = await response.json();
+          if (response.ok) {
+            document.getElementById(`key-display-${key}`).innerText = newKey;
+            document.getElementById(`key-display-${key}`).style.display = 'inline';
+            document.getElementById(`key-edit-${key}`).style.display = 'none';
+            document.getElementById(`secret-edit-${key}`).style.display = 'none';
+            document.getElementById(`update-${key}`).style.display = 'none';
+            alert('Secret updated successfully!');
+          } else {
+            alert('Error updating secret: ' + result.message);
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          alert('An error occurred.');
+        }
+      }
+    }
+
+    async function deleteSecret(key) {
+      if (confirm('Are you sure you want to delete this secret?')) {
+        try {
+          const response = await fetch(`/api-secrets/${key}`, {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': '<%= auth.token %>' // Include token for authorization
+            }
+          });
+          const result = await response.json();
+          if (response.ok) {
+            alert('Secret deleted successfully!');
+          } else {
+            alert('Error deleting secret: ' + result.message);
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          alert('An error occurred.');
+        }
+      }
+    }
+
+    async function sendRequest(url, method, data) {
+      try {
+        const response = await fetch(url, {
+          method: method,
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': '<%= auth.token %>' // Assuming 'auth.token' holds your token
+          },
+          body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+        // Check if the request was successful and refresh the page
+        if (response.ok) {
+          window.location.reload(); // Refresh the page
+        } else {
+          alert('Request failed:', result.message || 'Unknown error');
+        }
+
+      } catch (error) {
+        alert('Error:', error.message);
+      }
+    }
+
+
+    const blockUser = async (chatId) => {
+      sendRequest(`${apiBaseUrl}/user/block`, 'POST', { chatId });
+    }
+
+    const unblockUser = async (chatId) => {
+      sendRequest(`${apiBaseUrl}/user/unblock`, 'POST', { chatId });
+    }
+
+    const deleteUser = async (username) => {
+      try {
+        sendRequest(`${apiBaseUrl}/user/delete/${username}`, 'DELETE');
+      } catch (error) {
+        alert(error)
+      }
+    }
+
+
+    const removeAdmin = async (id) => {
+      try {
+        sendRequest(`${apiBaseUrl}/admin/remove/${id}`, 'DELETE');
+      } catch (error) {
+        alert(error)
+      }
+    }
+
+    document.getElementById('addAdminForm').addEventListener('submit', event => {
+      event.preventDefault();
+      const name = document.getElementById('adminName').value;
+      const email = document.getElementById('adminEmail').value;
+      sendRequest(`${apiBaseUrl}/admin/add`, 'POST', { name, email });
+    });
+
+    document.getElementById('addApiSecret').addEventListener('submit', event => {
+      event.preventDefault();
+      const key = document.getElementById('key').value;
+      const secret = document.getElementById('secret').value;
+      sendRequest(`${apiBaseUrl}/api-secrets`, 'POST', { key, secret });
+    });
+  </script>
+</body>
+
+</html>

@@ -1,7 +1,8 @@
 import { Cron } from '@nestjs/schedule';
 import { Injectable } from '@nestjs/common';
-import { AuthService } from 'src/auth/auth.service';
+import { UserService } from 'src/user/user.service';
 import { WeatherService } from 'src/weather/weather.service';
+import { ApiSecretService } from 'src/auth/secrets/secret.service';
 
 const TelegramBot = require('node-telegram-bot-api');
 
@@ -10,17 +11,31 @@ export class TelegramService {
   private bot: any;
 
   constructor(
-    private readonly authService: AuthService,
+    private readonly authService: UserService,
+    private readonly apiSecretService: ApiSecretService,
     private readonly weatherService: WeatherService,
-  ) {
-    this.bot = new TelegramBot(process.env.TELEGRAM_TOKEN, { polling: true });
-    this.bot.on('message', this.handleMessage.bind(this));
+  ) {}
+
+  async onModuleInit() {
+    try {
+      const telegramToken =
+        (await this.apiSecretService.getApiSecret('TELEGRAM_TOKEN')) ||
+        process.env.TELEGRAM_TOKEN;
+
+      this.bot = new TelegramBot(telegramToken, { polling: true });
+
+      this.bot.on('message', this.handleMessage.bind(this));
+
+      console.log('Telegram Bot initialized successfully');
+    } catch (error) {
+      console.error('Failed to initialize Telegram Bot:', error);
+    }
   }
 
   async handleMessage(msg): Promise<void> {
     const chatId = msg.chat.id;
     const chatUsername = msg.chat.username;
-   
+
     if (msg.text === '/start') {
       await this.bot.sendMessage(
         chatId,
@@ -94,7 +109,7 @@ export class TelegramService {
     }
   }
 
-  // @Cron('0 * * * *')
+  // @Cron('0 * * * *') 
   @Cron('30 1 * * *') // Runs every day 7:30 am IST or 1:30 UTC
   async handleCron(): Promise<void> {
     console.log('Scheduler triggered at:', new Date().toISOString());

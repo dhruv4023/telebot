@@ -2,9 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User } from './schemas/user.schema';
-
 @Injectable()
-export class AuthService {
+export class UserService {
   constructor(@InjectModel('User') private userModel: Model<User>) {}
 
   // Method to create a new user
@@ -20,7 +19,6 @@ export class AuthService {
   // Method to delete a user by username
   async deleteUserByUserName(username: string): Promise<string> {
     const result = await this.userModel.deleteOne({ username }).exec();
-    console.log(result.deletedCount);
     if (result.deletedCount === 0) {
       return 'you have already unsubscribed !!!';
     }
@@ -39,16 +37,16 @@ export class AuthService {
   ): Promise<string> {
     const user = await this.findUserByUserName(username);
     if (user) {
-      return 'you have already subscibed';
+      return 'you have already subscribed';
     }
     // Create a new user with details from Google
-    this.createUser(chatId, username);
-    return 'you have successfully subscibed to daily weather updates!';
+    await this.createUser(chatId, username);
+    return 'you have successfully subscribed to daily weather updates!';
   }
 
   // Method to get all subscribed users
   async getAllSubscribedUsers(): Promise<User[]> {
-    return this.userModel.find({ admin: false }).exec();
+    return this.userModel.find().exec();
   }
 
   // Method to get all blocked users
@@ -60,6 +58,7 @@ export class AuthService {
   async getAllNonBlockedUsers(): Promise<User[]> {
     return this.userModel.find({ blocked: false }).exec();
   }
+
   async getCityByChatId(chatId: number): Promise<string | null> {
     const user = await this.userModel.findOne({ chatId }).exec();
     if (user) {
@@ -67,6 +66,7 @@ export class AuthService {
     }
     return 'Ahmedabad';
   }
+
   // Method to update the city for a user
   async updateUserCity(chatId: number, city: string): Promise<string> {
     const result = await this.userModel
@@ -77,5 +77,29 @@ export class AuthService {
       return 'User not found or city is the same as before';
     }
     return 'City updated successfully';
+  }
+
+  // Method to block a user
+  async blockUser(chatId: number): Promise<string> {
+    const result = await this.userModel
+      .updateOne({ chatId }, { $set: { isBlocked: true } })
+      .exec();
+
+    if (result.modifiedCount === 0) {
+      return 'User not found or user is already blocked';
+    }
+    return 'User blocked successfully';
+  }
+
+  // Method to unblock a user
+  async unblockUser(chatId: number): Promise<string> {
+    const result = await this.userModel
+      .updateOne({ chatId }, { $set: { isBlocked: false } })
+      .exec();
+
+    if (result.modifiedCount === 0) {
+      return 'User not found or user is not blocked';
+    }
+    return 'User unblocked successfully';
   }
 }
