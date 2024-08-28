@@ -1,4 +1,4 @@
-import { Controller, Get, Redirect, Req, Res, UseGuards } from '@nestjs/common';
+import { Controller, Get, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Request, Response } from 'express';
 import * as session from 'express-session';
@@ -15,7 +15,7 @@ export class AuthController {
 
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
-  async googleAuthRedirect(@Req() req,@Res() res: Response) {
+  async googleAuthRedirect(@Req() req, @Res() res: Response) {
     if (req.session) {
       req.session.user = req.user;
       res.redirect('/admin-panel');
@@ -26,8 +26,14 @@ export class AuthController {
   }
 
   @Get('logout')
-  logout(@Req() req) {
-    req.logout(); // Assuming you're using session-based auth
-    return { message: 'Logged out successfully' };
+  logout(@Req() req: Request, @Res() res: Response) {
+    req.logout((err) => {
+      if (err) {
+        console.error('Logout error:', err);
+        return { message: 'Error during logout' };
+      }
+      return { message: 'Logged out successfully' };
+    });
+    res.redirect('/home');
   }
 }

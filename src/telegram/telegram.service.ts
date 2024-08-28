@@ -40,8 +40,9 @@ export class TelegramService {
     if (msg.text === '/start') {
       await this.bot.sendMessage(
         chatId,
-        'Use command /subscribe to subscribe to daily weather updates!\n' +
-          'Use command /unsubscribe to unsubscribe from daily weather updates!',
+        '- Use command /subscribe to subscribe to daily weather updates!\n\n' +
+          '- Use command /unsubscribe to unsubscribe from daily weather updates!\n\n' +
+          "- User command /city to set city as you wish 'Usage: /city <city_name>' \n example: /city Ahmedabad",
       );
     } else if (msg.text === '/subscribe') {
       await this.subscribeUser(chatId, chatUsername);
@@ -93,7 +94,7 @@ export class TelegramService {
     try {
       const users = await this.getSubscribedUsers();
       users.forEach(async (user) => {
-        if (!user.blocked) {
+        if (!user.isBlocked) {
           {
             const weatherData = await this.weatherService.fetchWeatherData(
               user.city,
@@ -110,7 +111,7 @@ export class TelegramService {
     }
   }
 
-  // @Cron('0 * * * *') 
+  // @Cron('* * * * *')
   @Cron('30 1 * * *') // Runs every day 7:30 am IST or 1:30 UTC
   async handleCron(): Promise<void> {
     console.log('Scheduler triggered at:', new Date().toISOString());

@@ -1,4 +1,6 @@
-import { Module } from '@nestjs/common';
+import {  MiddlewareConsumer, Module } from '@nestjs/common';
+import * as passport from 'passport';
+import * as session from 'express-session';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TelegramService } from './telegram/telegram.service';
@@ -34,4 +36,18 @@ import { ApiSecretService } from './auth/secrets/secret.service';
   controllers: [AppController],
   providers: [AppService, TelegramService, WeatherService],
 })
-export class AppModule {}
+export class AppModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(
+        session({
+          secret: process.env.SESSION_SECRET,
+          resave: false,
+          saveUninitialized: false,
+        }),
+        passport.initialize(),
+        passport.session(),
+      )
+      .forRoutes('*');
+  }
+}

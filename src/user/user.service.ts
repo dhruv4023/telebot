@@ -22,7 +22,7 @@ export class UserService {
     if (result.deletedCount === 0) {
       return 'you have already unsubscribed !!!';
     }
-    return 'User successfully unsubscribed';
+    return 'You have successfully unsubscribed';
   }
 
   // Method to find a user
