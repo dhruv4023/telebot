@@ -1,8 +1,9 @@
 import { Cron } from '@nestjs/schedule';
 import { Injectable } from '@nestjs/common';
-import { UserService } from 'src/user/user.service';
-import { WeatherService } from 'src/weather/weather.service';
-import { ApiSecretService } from 'src/auth/secrets/secret.service';
+
+import { UserService } from '../user/user.service';
+import { ApiSecretService } from '../auth/secrets/secret.service';
+import { WeatherService } from '../weather/weather.service';
 
 const TelegramBot = require('node-telegram-bot-api');
 
