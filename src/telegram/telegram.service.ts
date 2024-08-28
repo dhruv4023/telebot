@@ -111,8 +111,8 @@ export class TelegramService {
     }
   }
 
-  // @Cron('* * * * *')
-  @Cron('30 1 * * *') // Runs every day 7:30 am IST or 1:30 UTC
+  @Cron('* * * * *') // runs every minutes
+  // @Cron('30 1 * * *') // Runs every day 7:30 am IST or 1:30 UTC
   async handleCron(): Promise<void> {
     console.log('Scheduler triggered at:', new Date().toISOString());
     await this.sendDailyWeatherUpdate();
