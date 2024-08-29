@@ -84,7 +84,9 @@
           <th>Name</th>
           <th>Email</th>
           <th>Main Admin</th>
-          <th>Remove</th>
+          <% if (isMainAdmin) { %>
+            <th>Remove</th>
+            <% } %>
         </tr>
       </thead>
       <tbody id="adminsTableBody">
@@ -99,13 +101,11 @@
             <td>
               <%= admin.mainAdmin ? 'Yes' : 'No' %>
             </td>
-            <td>
-              <% if (!admin.mainAdmin) { %>
+            <% if (isMainAdmin && !admin.mainAdmin) { %>
+              <td>
                 <button onclick="removeAdmin('<%= admin._id %>')">Remove</button>
-                <% } else { %>
-                  <button disabled>Remove</button>
-                  <% } %>
-            </td>
+              </td>
+              <% } %>
           </tr>
           <% }); %>
       </tbody>

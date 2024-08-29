@@ -20,8 +20,10 @@ export class AppController {
     const auth = req?.session?.user;
     const message = req?.session?.message || '';
     const apiBaseUrl = 'http://localhost:3000'; // Replace with your actual API base URL
-
     if (auth) {
+      const isMainAdmin = (await this.adminService.getAdminByEmail(auth.email))
+        .mainAdmin;
+      // console.log(mainAdmin)
       const admins = await this.adminService.getAdmins();
       const users = await this.userService.getAllSubscribedUsers();
       const apiSecrets = await this.apiSecretService.getAllApiSecret();
@@ -33,6 +35,7 @@ export class AppController {
         admins,
         users,
         apiSecrets,
+        isMainAdmin,
       });
     } else {
       res.render('login', {
