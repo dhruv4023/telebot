@@ -1,0 +1,20 @@
+services:
+  app:
+    build: .
+    container_name: nest-app
+    ports:
+      - "3000:3000"
+    environment:
+      GOOGLE_CLIENT_ID: "${GOOGLE_CLIENT_ID}"
+      GOOGLE_CLIENT_SECRET: "${GOOGLE_CLIENT_SECRET}"
+      GOOGLE_CALLBACK_URL: "${GOOGLE_CALLBACK_URL}"
+      MONGODB_URI: "${MONGODB_URI}"
+      JWT_SECRET: "${JWT_SECRET}"
+      WEATHER_API_URL: "${WEATHER_API_URL}"
+      SESSION_SECRET: "${SESSION_SECRET}"
+      ENCRYPTION_KEY: "${ENCRYPTION_KEY}"
+      TELEGRAM_TOKEN: "${TELEGRAM_TOKEN}"
+      WEATHER_API_KEY: "${WEATHER_API_KEY}"
+    volumes:
+      - .:/usr/src/app
+    command: npm run start:prod

@@ -44,7 +44,8 @@
     "reflect-metadata": "^0.2.0",
     "rxjs": "^7.8.1",
     "serve-static": "^1.15.0",
-    "typeorm": "^0.3.20"
+    "typeorm": "^0.3.20",
+    "weather-bot": "file:"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.0.0",
