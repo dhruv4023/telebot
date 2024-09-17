@@ -44,7 +44,7 @@
     </div>
 
     <script>
-        const apiBaseUrl = 'http://localhost:3000';
+        const apiBaseUrl = '<%= apiBaseUrl %>'; // Replace with your actual API base UR
 
         document.getElementById('loginButton').addEventListener('click', () => {
             window.location.href = `${apiBaseUrl}/auth/google`;
